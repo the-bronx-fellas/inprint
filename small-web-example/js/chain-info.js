@@ -1,7 +1,8 @@
-'use strict';
 
-// TODO uses string literals and parse it
-// it's supposed to be faster
+
+import inprintPreABI from './TMPInprint.json';
+
+export const INPRINT_ABI = inprintPreABI.abi;
 
 export const PROVIDER_PARAMS = JSON.parse('{ "hardhat-local": { "chainId": "0x7A69", "chainName": "hardhat-local", "nativeCurrency": { "name": "GO", "symbol": "GO", "decimals": 18 }, "rpcUrls": [ "http://127.0.0.1:8545" ] }, "optimism": { "chainId": "0x10", "chainName": "Optimism", "nativeCurrency": { "name": "ETH", "symbol": "ETH", "decimals": 18 }, "rpcUrls": [ "https://optimism-mainnet.gateway.pokt.network/v1/lb/62b66987123e6f0039836b33" ] } }');
 
@@ -28,4 +29,3 @@ export const CHAIN_ID_MAPPING = {
   1666600000: 'Harmony Mainnet'
 };
 
-export const INPRINT_ABI = JSON.parse('[ { "inputs": [ { "internalType": "string", "name": "_blog_name", "type": "string" }, { "internalType": "string", "name": "_blog_description", "type": "string" } ], "stateMutability": "nonpayable", "type": "constructor" }, { "inputs": [], "name": "blog_info", "outputs": [ { "internalType": "string", "name": "", "type": "string" }, { "internalType": "string", "name": "", "type": "string" }, { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "string", "name": "_blog_description", "type": "string" } ], "name": "change_blog_description", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "string", "name": "_blog_name", "type": "string" } ], "name": "change_blog_name", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" } ]');
