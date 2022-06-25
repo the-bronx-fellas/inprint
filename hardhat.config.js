@@ -35,13 +35,22 @@ module.exports = {
       }
     }
   },
+
   paths: {
     sources: "./contracts",
     tests: "./test",
     cache: "./cache",
     artifacts: "./artifacts"
   },
+
   mocha: {
     timeout: 40000
+  },
+
+  abiExporter: {
+    runOnCompile: true,
+    clear: true,
+    flat: true,
+    pretty: false,
   }
 };
