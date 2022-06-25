@@ -46,10 +46,6 @@ export class Blog {
     });
   };
 
-
-
-
-
   /* modifier methods */
   changeBlogName = (newName) => {
     return new Promise((resolve, reject) => {
