@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import './App.css'
-import inPrint from './artifacts/contracts/Inprint.sol/Inprint.json'
+import inprintPreABI from './artifacts/contracts/Inprint.sol/Inprint.json';
 
 // NOTE: Make sure to change this to the contract address you deployed
 const inPrintAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
 // ABI so the web3 library knows how to interact with our contract
-const inPrintAbi = inPrint.abi
+const inPrintAbi = inprintPreABI.abi;
 
 // NOTE: checkout the API for ethers.js here: https://docs.ethers.io/v5/api/
 // TIP: Remember to console.log something if you are unsure of what is being returned
