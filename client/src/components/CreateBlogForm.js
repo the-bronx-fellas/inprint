@@ -4,10 +4,10 @@ import { ethers } from 'ethers';
 import { connectBlog } from '../hooks/inPrintHooks'
 
 const CreateBlogForm = (props) => {
-
-    console.log(props)
+    const [userName, setUserName] = useState('')
     const [contract, setContract] = useState()
-    const [creator, setCreator] = useState('')
+    const [creator, setCreator] = useState('');
+
 
     const defaultLocalState = {
       blogDescription: '',
@@ -22,6 +22,9 @@ const CreateBlogForm = (props) => {
 
     const [intake, setIntake] = useState(defaultLocalState)
 
+    const handleUserName = (e) => {
+      setUserName(e.target.value)
+    }
 
     const handleChange = (e) => {
       setIntake({
@@ -43,11 +46,13 @@ const CreateBlogForm = (props) => {
 
     useEffect(()=>{
       const blog = connectBlog();
+      (async ()=>{
+        await blog.authWithMetamask();
+        blog.connectSigner();
+      })()
       setContract(blog)
       setCreator(props.account)
     }, [props.account])
-
-    console.log('contract here', contract)
 
     const handleSubmit = (e) => {
       e.preventDefault();
@@ -66,19 +71,15 @@ const CreateBlogForm = (props) => {
         modifiableP: intake.modifiable,
         allowRepliesP: intake.allowsReplies,
         blogMetadata: '' };
-      console.log(blogObj);
       try {
-        console.log("----");
-        console.dir(contract);
-        console.log(await contract.connectSigner());
         await contract.deployNewBlog(blogObj).then(console.log)
+        await contract.inaugurateBlog(userName).then(console.log)
       } catch (error) {
         alert(error)
       }
     }
 
     const { blogName, blogDescription, multiUser, publicBlog, deletable, modifiable, allowsReplies } = intake
-    console.log('intake', intake)
     return (
       <Box
       component="form"
@@ -97,6 +98,8 @@ const CreateBlogForm = (props) => {
           <TextField disabled id="outline-disabled" label="Wallet Address" value={`${creator}`} InputProps={{
             readOnly: true,
           }} />
+          <br></br><br></br>
+          <TextField required id="userName" label="userName" value={userName} onChange={handleUserName} />
           <br></br><br></br>
           <TextField required id="blogName" label="Blog Name" value={blogName} onChange={handleChange} />
           <br></br><br></br>
