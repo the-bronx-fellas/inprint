@@ -3,13 +3,13 @@ import { ethers } from 'ethers';
 import { INPRINT_ABI, INPRINT_BYTECODE } from './chain-info.js';
 
 
-
 export class Blog {
 
   constructor(rpcURL) {
     this.rpcURL = rpcURL;
     this.abi = INPRINT_ABI;
     this.address = null;
+    this.publicKey = null;
     this.provider = new ethers.providers.JsonRpcProvider(this.rpcURL);
     this.contract = null;
     this.signer = null;
@@ -31,13 +31,15 @@ export class Blog {
     return new Promise((resolve, reject) => {
       this.contract.blog_info()
         .then(objFromChain => {
+          let tmpMeta = objFromChain['5'];
+          try { tmpMeta = JSON.parse(tmpMeta); } catch { tmpMeta = {}; }
           const blogInfo = {
             blogName:         objFromChain['0'],
             blogDescription:  objFromChain['1'],
             creator:          objFromChain['2'],
             createdOn:        objFromChain['3'].toNumber(),
             blogFlags:        objFromChain['4'],
-            blogMetadata:     objFromChain['5'],
+            blogMetadata:     tmpMeta,
             currentUserIndex: objFromChain['6'].toNumber(),
             currentPostID:    objFromChain['7'].toNumber()
           };
@@ -48,7 +50,7 @@ export class Blog {
     });
   };
 
-  getUserInfo = async (myContract) => {
+  getUserInfo = async () => {
     return new Promise((resolve, reject) => {
       this.contract.get_all_users()
         .then((objFromChain) => {
@@ -139,6 +141,8 @@ export class Blog {
         .then(address => {
           // this.contract = this.contract.connect(this.signer);
           this.address = address;
+          // TODO: THIS IS WRONG
+          this.publicKey = "3cac9e0f04a5d379e8f49a531d8fc683cd422e259a5e7b062bcff3de582b7c6008918c2fa60a9ff6c86deaea9daa3ed13ed94278d17c279749261016313483ef";
           resolve(this.address);
         })
         .catch(error => reject(new Error(error)));
@@ -151,15 +155,20 @@ export class Blog {
   /* 11111111111111                                      */
 
   deployNewBlog = async ({ creator, blogName, blogDescription,
-                     blogFlags, blogMetadata }) => {
+                           multiuserP, publicP, deletableP,
+                           modifiableP, allowRepliesP,
+                           blogMetadata }) => {
     return new Promise(async (resolve, reject) => {
+      let flagsHex;
+      flagsHex = Blog.makeBlogFlagHex({ multiuserP, publicP, deletableP,
+                                        modifiableP, allowRepliesP });
 
       try {
         let factory = new ethers.ContractFactory(INPRINT_ABI,
                                                 INPRINT_BYTECODE,
                                                 this.signer);
         let depped = await factory.deploy(creator, blogName, blogDescription,
-                                          blogFlags, blogMetadata);
+                                          flagsHex, blogMetadata);
         await depped.deployTransaction.wait();
 
         resolve(depped.address);
@@ -174,20 +183,53 @@ export class Blog {
   /* --------------------------------------------------- */
   /* 22222222222222                                      */
 
-  publishPost = (content, parent, postType, postFlags, postMetadata) => {
+  publishPost = (content, parent, postType, encryptP, postMetadata) => {
     return new Promise((resolve, reject) => {
+      let flagsHex;
+      flagsHex = Blog.makePostFlagHex({ encryptP });
+      // if (encryptP)
+      //   content = ecry.encryptWithPublicKey(this.publicKey, content);
+
       const tmp = ethers.utils.arrayify(ethers.utils.keccak256(ethers.utils.toUtf8Bytes(content)));
       this.signer.signMessage(tmp).then(sig => {
           return this.contract.publish_post(content, sig, parent, postType,
-            postFlags, postMetadata);
-
-        }).catch(error => reject(new Error(error))).then(ret => {
+            flagsHex, postMetadata);
+        }).
+        catch(error => reject(new Error(error))).
+        then(ret => {
           resolve(ret);
         });
     });
   };
 
 
+  /* --------------------------------------------------- */
+
+
+  /* --------------------------------------------------- */
+  /* STATIC METHODS                                      */
+
+  static makeBlogFlagHex = ({ multiuserP, publicP, deletableP, modifiableP, allowRepliesP }) => {
+    let buildingFlags = 0;
+    if (multiuserP)
+      buildingFlags = buildingFlags | "0x8000";
+    if (publicP)
+      buildingFlags = buildingFlags | "0x4000";
+    if (deletableP)
+      buildingFlags = buildingFlags | "0x2000";
+    if (modifiableP)
+      buildingFlags = buildingFlags | "0x1000";
+    if (allowRepliesP)
+      buildingFlags = buildingFlags | "0x0800";
+    return buildingFlags;
+  };
+
+  static makePostFlagHex = ({ encryptedP }) => {
+    let buildingFlags = 0;
+    if (encryptedP)
+      buildingFlags = buildingFlags | "0x1000";
+    return buildingFlags;
+  };
   /* --------------------------------------------------- */
 
 }

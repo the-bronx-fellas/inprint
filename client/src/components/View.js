@@ -3,9 +3,8 @@ import { Box, Paper, AppBar, Toolbar, Typography, Grid, Button } from '@mui/mate
 import { Blog } from '../hooks/inprint';
 import { ethers } from 'ethers'
 
-const blog = new Blog("0x5FbDB2315678afecb367f032d93F642f64180aa3",
-                      "http://127.0.0.1:8545");
-
+const blog = new Blog("http://127.0.0.1:8545");
+blog.connectToBlogAddress('0x5FbDB2315678afecb367f032d93F642f64180aa3')
 const View = () => {
 
   //blog.inaugurateBlog(username<string>)
