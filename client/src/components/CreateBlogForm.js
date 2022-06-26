@@ -60,13 +60,17 @@ const CreateBlogForm = (props) => {
         creator,
         blogName: intake.blogName,
         blogDescription: intake.blogDescription,
-        multiUserP: intake.multiUser,
-        publicBlogP: intake.publicBlog,
+        multiuserP: intake.multiUser,
+        publicP: intake.publicBlog,
         deletableP: intake.deletable,
         modifiableP: intake.modifiable,
-        allowsRepliesP: intake.allowsReplies,
-        blogMetaData: '' };
+        allowRepliesP: intake.allowsReplies,
+        blogMetadata: '' };
+      console.log(blogObj);
       try {
+        console.log("----");
+        console.dir(contract);
+        console.log(await contract.connectSigner());
         await contract.deployNewBlog(blogObj).then(console.log)
       } catch (error) {
         alert(error)
