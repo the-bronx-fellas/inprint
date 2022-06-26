@@ -52,7 +52,7 @@ const Creation = () => {
   const ValidConnection = () => {
     return (
       <>
-        <CreateBlogForm />
+        <CreateBlogForm account={account} />
       </>
     )
   }
@@ -63,7 +63,8 @@ const Creation = () => {
       width: '90vw',
       height: '100vh',
       border: 'solid 1px black',
-      display: 'flex'
+      display: 'flex',
+      justifyItems: 'center'
     }}>
 
       {connected ? (<ValidConnection />) : (<NotConnected />)}
