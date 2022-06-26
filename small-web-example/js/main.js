@@ -6,61 +6,53 @@ import * as ethers from './ethers-5.2.esm.min.js';
 import { Blog } from './inprint.js';
 
 
-const blog = new Blog("0x5FbDB2315678afecb367f032d93F642f64180aa3",
-                      "http://127.0.0.1:8545");
+let blog;
+
+
+
+
 
 const startDapp = async () => {
 
   console.log("dapp started");
 
-  blog.getBlogInfo()
-    .then(ret => {
-      document.getElementById("blog-name").innerHTML = ret.blogName;
-      document.getElementById("blog-description").innerHTML = ret.blogDescription;
-      console.log(ret);
-    });
-                
-  const mmbutton = document.getElementById("connect-button");
-  const cbnbutton = document.getElementById("change-blog-name");
-  const ibbutton = document.getElementById("inaugurate-blog");
+  blog = new Blog("http://127.0.0.1:8545");
 
-  const logInToMetaMask = () => {
-    blog.authWithMetamask()
-      .then(() => {
-        mmbutton.innerText = blog.getAddress();
-        mmbutton.disabled = true;
-      })
-      .then(() => {
+  console.log(blog);
 
+  await blog.authWithMetamask();
 
-        const makeChangeBlogName = () => {
-          let newName = prompt("enter new name");
-          blog.changeBlogName(newName)
-            .then(console.log);
-        };
-        cbnbutton.addEventListener('click', makeChangeBlogName);
+  let nAddress = await blog.deployNewBlog({ creator: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                             blogName: "The Chuckle Hut", blogDescription: "a place 4 laffs",
+                             blogFlags: "0x0000", blogMetadata: "" });
 
+  console.log(nAddress);
 
-        const makeInaugurateBlog = () => {
-          let username = prompt("enter username");
-          blog.inaugurateBlog(username)
-            .then(console.log);
+  blog.connectToBlogAddress(nAddress);
+  blog.connectSigner();
 
-        };
-        ibbutton.addEventListener('click', makeInaugurateBlog);
+  console.log(await blog.getBlogInfo());
+
+  // await blog.changeBlogName("Chuckle Hut 2!!!!!");
+  //
+  // console.log(await blog.getBlogInfo());
+
+  console.log(await blog.changeBlogName("Chuckle Hut 2!!!!!"));
+
+  console.log(await blog.getBlogInfo());
 
 
 
-      });
+  const spitButton = document.getElementById("spit-blog-info");
+
+  const spitIt = async () => {
+    console.log(await blog.getBlogInfo());
   };
+  spitButton.addEventListener("click", spitIt);
 
-
-  mmbutton.addEventListener('click', logInToMetaMask);
-    
-  
-                    
 
 };
+
 
 
 

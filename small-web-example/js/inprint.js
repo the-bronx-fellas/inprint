@@ -1,23 +1,33 @@
 
 import * as ethers from './ethers-5.2.esm.min.js';
 
-import { INPRINT_ABI } from './TMPABI.js';
+import { INPRINT_ABI, INPRINT_BYTECODE } from './TMPABI.js';
 
 
 
 export class Blog {
 
-  constructor(address, rpcURL) {
+  constructor(rpcURL) {
     this.rpcURL = rpcURL;
     this.abi = INPRINT_ABI;
-    this.address = address;
+    this.address = null;
     this.provider = new ethers.providers.JsonRpcProvider(this.rpcURL);
-    this.contract = new ethers.Contract(address, this.abi, this.provider);
+    this.contract = null;
     this.signer = null;
     this.address = null;
   }
 
-  /* reader methods */
+  connectToBlogAddress = (address) => {
+    this.contract = new ethers.Contract(address, this.abi, this.provider);
+  };
+
+  connectSigner = () => {
+    this.contract = this.contract.connect(this.signer);
+  };
+
+  /* --------------------------------------------------- */
+  /* reader methods                                      */
+
   getBlogInfo = () => {
     return new Promise((resolve, reject) => {
       this.contract.blog_info()
@@ -39,15 +49,54 @@ export class Blog {
     });
   };
 
-  inaugurateBlog = (username) => {
+  getUserInfo = async (myContract) => {
     return new Promise((resolve, reject) => {
-      this.contract.inaugurate_blog(username)
-        .then(() => resolve(true));
+      this.contract.get_all_users()
+        .then((objFromChain) => {
+          const allUsers = {};
+          objFromChain.forEach(it => {
+            if (it[1] !== 'uncaused-cause') {
+              let [tmpaddress, username, time_joined, user_metadata] = it;
+              try { user_metadata = JSON.parse(user_metadata); } catch { user_metadata = {}; }
+              allUsers[tmpaddress] = {
+                username: username,
+                time_joined: time_joined.toNumber(),
+                user_metadata: user_metadata
+              };
+            }
+          });
+          resolve(allUsers);
+        })
+        .catch((error) => reject(new Error(error)));
     });
   };
 
-  /* modifier methods */
-  changeBlogName = (newName) => {
+
+  getAllPosts = () => {
+    return new Promise((resolve, reject) => {
+      this.contract.get_all_posts().
+        then(objFromChain => {
+          resolve(objFromChain)
+        }).
+        catch(error => reject(new Error(error)));
+
+    });
+  };
+  /* --------------------------------------------------- */
+
+  inaugurateBlog = (username) => {
+    return new Promise((resolve, reject) => {
+      this.contract.inaugurate_blog(username)
+        .then(() => resolve(true))
+        .catch(error => reject(new Error(error)));
+    });
+  };
+
+
+  /* --------------------------------------------------- */
+  /* modifier methods                                    */
+
+  changeBlogName = async (newName) => {
     return new Promise((resolve, reject) => {
       this.contract.change_blog_name(newName)
         .then(ret => {
@@ -60,7 +109,6 @@ export class Blog {
     });
   }
 
-  /* modifier methods */
   changeBlogDescription = (newDescription) => {
     return new Promise((resolve, reject) => {
       this.contract.check_blog_description(newDescription)
@@ -73,9 +121,12 @@ export class Blog {
         .catch(error => reject(new Error(error)));
     });
   }
+  /* --------------------------------------------------- */
 
 
-  /* authentication things */
+  /* --------------------------------------------------- */
+  /* authentication things                               */
+
   getAddress = () => {
     return this.address;
   };
@@ -89,46 +140,61 @@ export class Blog {
           return this.signer.getAddress();
         })
         .then(address => {
-          this.contract = this.contract.connect(this.signer);
+          // this.contract = this.contract.connect(this.signer);
           this.address = address;
-          console.log(this.address);
-          console.log(this.signer);
-          resolve(true);
+          resolve(this.address);
+        })
+        .catch(error => reject(new Error(error)));
+    });
+  };
+  /* --------------------------------------------------- */
+
+
+  /* --------------------------------------------------- */
+  /* 11111111111111                                      */
+
+  deployNewBlog = async ({ creator, blogName, blogDescription,
+                     blogFlags, blogMetadata }) => {
+    return new Promise(async (resolve, reject) => {
+
+      try {
+        let factory = new ethers.ContractFactory(INPRINT_ABI,
+                                                INPRINT_BYTECODE,
+                                                this.signer);
+        let depped = await factory.deploy(creator, blogName, blogDescription,
+                                          blogFlags, blogMetadata);
+        await depped.deployTransaction.wait();
+
+        resolve(depped.address);
+      } catch (error) {
+        reject(error);
+      }
+
+      });
+  };
+  /* --------------------------------------------------- */
+
+  /* --------------------------------------------------- */
+  /* 22222222222222                                      */
+
+  publishPost = (content, parent, postType, postFlags, postMetadata) => {
+    return new Promise((resolve, reject) => {
+      const tmp = ethers.utils.arrayify(ethers.utils.keccak256(ethers.utils.toUtf8Bytes(content)));
+      this.signer.signMessage(tmp).
+        then(sig => {
+          return this.contract.publish_post(content, sig, parent, postType,
+            postFlags, postMetadata);
+            
+        }).
+        catch(error => reject(new Error(error))).
+        then(ret => {
+          resolve(ret);
         });
     });
   };
 
+
+  /* --------------------------------------------------- */
+
 }
 
-// export const connectToMetaMask = async (stationState) => {
-//   window._DEBUG('attempting connecting to metamask');
-//   return new Promise(async (resolve, reject) => {
-//     const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
-//     let signer;
-//     let myAddress;
-//     try {
-//       await provider.send('eth_requestAccounts', []);
-//       const currentChainId = ethereum.networkVersion;
-//       const detectedChain = CHAIN_ID_MAPPING[currentChainId];
-//       console.log(`ccid: ${currentChainId}`);
-//       console.log(`dc: ${detectedChain}`);
-//       if (PROVIDER_PARAMS[stationState.contract.chain].chainName !== detectedChain) {
-//         console.log('WRONG!!');
-//         if (confirm("Switch to correct chain?\n\nAfterwards, when the page reloads, you'll have to connect again")) {
-//           await addOrSwitchNetwork(stationState.contract.chain);
-//         } else {
-//           throw new Error('user declined to change networks... bailing out');
-//         }
-//       }
-//       signer = provider.getSigner();
-//       myAddress = await signer.getAddress();
-//       resolve({
-//         _provider: provider,
-//         _signer: signer,
-//         _myAddress: myAddress
-//       });
-//     } catch (error) {
-//       reject(error);
-//     }
-//   });
-// };
