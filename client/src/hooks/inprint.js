@@ -1,6 +1,6 @@
 
 import { ethers } from 'ethers';
-import { INPRINT_ABI, INPRINT_BYTECODE } from 'chain-info.js';
+import { INPRINT_ABI, INPRINT_BYTECODE } from './chain-info.js';
 
 
 
@@ -73,11 +73,9 @@ export class Blog {
 
   getAllPosts = () => {
     return new Promise((resolve, reject) => {
-      this.contract.get_all_posts().
-        then(objFromChain => {
+      this.contract.get_all_posts().then(objFromChain => {
           resolve(objFromChain)
-        }).
-        catch(error => reject(new Error(error)));
+        }).catch(error => reject(new Error(error)));
 
     });
   };
@@ -179,14 +177,11 @@ export class Blog {
   publishPost = (content, parent, postType, postFlags, postMetadata) => {
     return new Promise((resolve, reject) => {
       const tmp = ethers.utils.arrayify(ethers.utils.keccak256(ethers.utils.toUtf8Bytes(content)));
-      this.signer.signMessage(tmp).
-        then(sig => {
+      this.signer.signMessage(tmp).then(sig => {
           return this.contract.publish_post(content, sig, parent, postType,
             postFlags, postMetadata);
-            
-        }).
-        catch(error => reject(new Error(error))).
-        then(ret => {
+
+        }).catch(error => reject(new Error(error))).then(ret => {
           resolve(ret);
         });
     });
