@@ -3,18 +3,10 @@ import { Box, Paper, AppBar, Toolbar, Typography, Grid, Button } from '@mui/mate
 import { Blog } from '../hooks/inprint';
 import { ethers } from 'ethers'
 
-const blog = new Blog("http://127.0.0.1:8545");
-blog.connectToBlogAddress('0x5FbDB2315678afecb367f032d93F642f64180aa3')
-const View = () => {
+const blog = new Blog("0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                      "http://127.0.0.1:8545");
 
-  //blog.inaugurateBlog(username<string>)
-  //blog.
-
-  // const create = async () => {
-  //   blog.getBlogInfo().then(console.log).then(()=> blog.authWithMetamask()).then(()=> blog.inaugurateBlog('WhateverIwant')).then(console.log)
-  // }
-
-
+const Creation = () => {
 
 
   const [provider, setProvider] = useState()
@@ -49,9 +41,27 @@ const View = () => {
     }
   }
 
+  const NotConnected = () => {
+    return (
+      <>
+      <Typography variant="h4">
+        Connect with Metamask:
+        <br></br>
+        <Button onClick={()=>{connectAccount()}}>
+          Connect
+        </Button>
+      </Typography>
+      </>
+    )
+  }
 
-  //Privy test run
-
+  const ValidConnection = () => {
+    return (
+      <>
+        Form here
+      </>
+    )
+  }
 
   return (
 
@@ -61,39 +71,15 @@ const View = () => {
       border: 'solid 1px black',
       display: 'flex'
     }}>
-      <Grid container spacing={1} columns={5}>
-        <Grid item xs={3} sx={{
-          border: 'solid 1px black'
-        }}>
 
-        {blogPosts ? (
-          <>
-          {`Name: ${blogPosts.blogName}`}
-          <br></br>
-          {`Description: ${blogPosts.blogDescription}`}
-          </>
-        ) : ('No current blog')}
+      {connected ? (<ValidConnection />) : (<NotConnected />)}
 
-        </Grid>
-
-
-
-        <Grid item xs={2} sx={{
-          border: 'solid 1px black'
-        }}>
-          post wallet address here : {connected ? (account) : (
-          <Button onClick={()=>connectAccount()}>
-            Connect
-          </Button>)}
-
-
-        </Grid>
-      </Grid>
     </Paper>
 
 
 
     )
+
 }
 
-export default View
+export default Creation;
