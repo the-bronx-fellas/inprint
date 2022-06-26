@@ -66,6 +66,7 @@ const CreateBlogForm = (props) => {
         modifiableP: intake.modifiable,
         allowsRepliesP: intake.allowsReplies,
         blogMetaData: '' };
+        console.log(blogObj)
       try {
         await contract.deployNewBlog(blogObj).then(console.log)
       } catch (error) {
