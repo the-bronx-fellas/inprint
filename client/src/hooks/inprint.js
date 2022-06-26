@@ -31,13 +31,15 @@ export class Blog {
     return new Promise((resolve, reject) => {
       this.contract.blog_info()
         .then(objFromChain => {
+          let tmpMeta = objFromChain['5'];
+          try { tmpMeta = JSON.parse(tmpMeta); } catch { tmpMeta = {}; }
           const blogInfo = {
             blogName:         objFromChain['0'],
             blogDescription:  objFromChain['1'],
             creator:          objFromChain['2'],
             createdOn:        objFromChain['3'].toNumber(),
             blogFlags:        objFromChain['4'],
-            blogMetadata:     objFromChain['5'],
+            blogMetadata:     tmpMeta,
             currentUserIndex: objFromChain['6'].toNumber(),
             currentPostID:    objFromChain['7'].toNumber()
           };
@@ -48,7 +50,7 @@ export class Blog {
     });
   };
 
-  getUserInfo = async (myContract) => {
+  getUserInfo = async () => {
     return new Promise((resolve, reject) => {
       this.contract.get_all_users()
         .then((objFromChain) => {
@@ -153,15 +155,20 @@ export class Blog {
   /* 11111111111111                                      */
 
   deployNewBlog = async ({ creator, blogName, blogDescription,
-                     blogFlags, blogMetadata }) => {
+                           multiuserP, publicP, deletableP,
+                           modifiableP, allowRepliesP,
+                           blogMetadata }) => {
     return new Promise(async (resolve, reject) => {
+
+      flagsHex = Blog.makeFlagHex({ multiuserP, publicP, deletableP,
+                                    modifiableP, allowRepliesP });
 
       try {
         let factory = new ethers.ContractFactory(INPRINT_ABI,
                                                 INPRINT_BYTECODE,
                                                 this.signer);
         let depped = await factory.deploy(creator, blogName, blogDescription,
-                                          blogFlags, blogMetadata);
+                                          flagsHex, blogMetadata);
         await depped.deployTransaction.wait();
 
         resolve(depped.address);
@@ -183,7 +190,6 @@ export class Blog {
         then(sig => {
           return this.contract.publish_post(content, sig, parent, postType,
             postFlags, postMetadata);
-            
         }).
         catch(error => reject(new Error(error))).
         then(ret => {
@@ -193,6 +199,26 @@ export class Blog {
   };
 
 
+  /* --------------------------------------------------- */
+
+
+  /* --------------------------------------------------- */
+  /* STATIC METHODS                                      */
+
+  static makeFlagHex = ({ multiuserP, publicP, deletableP, modifiableP, allowRepliesP }) => {
+    buildingFlags = 0;
+    if (multiuserP)
+      buildingFlags = buildingFlags | "0x8000";
+    if (publicP)
+      buildingFlags = buildingFlags | "0x4000";
+    if (deletableP)
+      buildingFlags = buildingFlags | "0x2000";
+    if (modifiableP)
+      buildingFlags = buildingFlags | "0x1000";
+    if (allowRepliesP)
+      buildingFlags = buildingFlags | "0x0800";
+    return buildingFlags;
+  };
   /* --------------------------------------------------- */
 
 }
