@@ -159,9 +159,20 @@ export class Blog {
                            modifiableP, allowRepliesP,
                            blogMetadata }) => {
     return new Promise(async (resolve, reject) => {
+      
+      console.log({ creator, blogName, blogDescription,
+                           multiuserP, publicP, deletableP,
+                           modifiableP, allowRepliesP,
+                           blogMetadata });
+
       let flagsHex;
-      flagsHex = Blog.makeBlogFlagHex({ multiuserP, publicP, deletableP,
-                                        modifiableP, allowRepliesP });
+      flagsHex = Blog.makeBlogFlagHex({ multiuserP: multiuserP,
+        publicP: publicP,
+        deletableP: deletableP,
+        modifiableP: modifiableP,
+        allowRepliesP: allowRepliesP });
+
+      console.log(`FLAGS: ${flagsHex}`);
 
       try {
         let factory = new ethers.ContractFactory(INPRINT_ABI,
@@ -210,7 +221,10 @@ export class Blog {
   /* STATIC METHODS                                      */
 
   static makeBlogFlagHex = ({ multiuserP, publicP, deletableP, modifiableP, allowRepliesP }) => {
-    let buildingFlags = 0;
+
+    console.log({ multiuserP, publicP, deletableP, modifiableP, allowRepliesP });
+
+    let buildingFlags = "0x0000";
     if (multiuserP)
       buildingFlags = buildingFlags | "0x8000";
     if (publicP)
