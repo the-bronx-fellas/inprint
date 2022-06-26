@@ -4,7 +4,6 @@ import { INPRINT_ABI, INPRINT_BYTECODE } from 'chain-info.js';
 
 
 
-
 export class Blog {
 
   constructor(rpcURL) {
@@ -103,7 +102,7 @@ export class Blog {
           if (ret)
             resolve(ret)
           else
-            reject(new Error(error))
+            reject(new Error('error'))
         })
         .catch(error => reject(new Error(error)));
     });
@@ -116,7 +115,7 @@ export class Blog {
           if (ret)
             resolve(ret)
           else
-            reject(new Error(error))
+            reject(new Error('error'))
         })
         .catch(error => reject(new Error(error)));
     });
