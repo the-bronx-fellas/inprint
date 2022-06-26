@@ -1,6 +1,6 @@
 
 import { ethers } from 'ethers';
-import { INPRINT_ABI } from 'chain-info.js';
+import { INPRINT_ABI } from './chain-info';
 
 export class Blog {
 
@@ -58,7 +58,7 @@ export class Blog {
           if (ret)
             resolve(ret)
           else
-            reject(new Error(error))
+            reject(new Error('error'))
         })
         .catch(error => reject(new Error(error)));
     });
@@ -71,7 +71,7 @@ export class Blog {
           if (ret)
             resolve(ret)
           else
-            reject(new Error(error))
+            reject(new Error('error'))
         })
         .catch(error => reject(new Error(error)));
     });

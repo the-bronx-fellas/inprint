@@ -23,6 +23,9 @@ module.exports = {
     optimism: {
       url: "https://optimism-mainnet.gateway.pokt.network/v1/lb/62b66987123e6f0039836b33",
       accounts: [`0x${process.env.ETHPRIV}`]
+    },
+    hardhat: {
+      chainID: 31337
     }
   },
 
