@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { Box, Paper, AppBar, Toolbar, Typography, Grid, Button } from '@mui/material'
 // import { Blog } from '../hooks/inprint';
 import { connectBlog } from '../hooks/inPrintHooks'
-import { ethers } from 'ethers'
+import { ethers } from 'ethers';
+import ViewCard from './ViewCard'
+import PrivyCheck from './PrivyCheck';
 
 // const blog = new Blog("http://127.0.0.1:8545");
 // blog.connectToBlogAddress('0x5FbDB2315678afecb367f032d93F642f64180aa3')
@@ -61,11 +63,8 @@ const View = () => {
         }}>
 
         {blogPosts ? (
-          <>
-          {`Name: ${blogPosts.blogName}`}
-          <br></br>
-          {`Description: ${blogPosts.blogDescription}`}
-          </>
+          <ViewCard title={blogPosts.blogName} description={blogPosts.blogDescription} />
+
         ) : ('No current blog')}
 
         </Grid>
@@ -73,7 +72,15 @@ const View = () => {
         <Grid item xs={2} sx={{
           border: 'solid 1px black'
         }}>
-          post wallet address here : {connected ? (account) : (
+          post wallet address here : {connected ? (
+            <>
+            <PrivyCheck account={account} />
+            {/* PASS INTO PRIVY{account} */}
+            <br></br>
+            Connect to Privy?
+
+            </>
+            ) : (
           <Button onClick={()=>connectAccount()}>
             Connect
           </Button>)}

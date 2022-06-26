@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Box, Paper, AppBar, Toolbar, Typography, Grid, Button } from '@mui/material'
+import { Box, Paper, AppBar, Toolbar, Typography, Grid, Button} from '@mui/material'
+import { Link } from 'react-router-dom'
 
 const NavBar = () =>{
 
@@ -11,16 +12,20 @@ const NavBar = () =>{
 
     }}>
       <Toolbar>
-        <Typography variant="h6" sx={{
-          border: 'solid 1px gray',
-          py: 2,
-          px: 2,
-          my: 2,
-          alignSelf: 'center',
-          justifyContent: 'center'
-        }}>
-          InPrint
-        </Typography>
+        <Link style={{textDecoration: 'none'}} to="/home">
+          <Typography variant="h6" noUnderline sx={{
+            border: 'solid 1px gray',
+            py: 2,
+            px: 2,
+            my: 2,
+            alignSelf: 'center',
+            justifyContent: 'center',
+            color: 'black'
+          }
+        }>
+            InPrint
+          </Typography>
+        </Link>
 
       </Toolbar>
 
