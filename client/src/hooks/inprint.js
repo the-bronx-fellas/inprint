@@ -1,7 +1,7 @@
 
 import { ethers } from 'ethers';
 import { INPRINT_ABI, INPRINT_BYTECODE } from 'chain-info.js';
-
+import ecry from 'eth-crypto';
 
 
 export class Blog {
@@ -10,6 +10,7 @@ export class Blog {
     this.rpcURL = rpcURL;
     this.abi = INPRINT_ABI;
     this.address = null;
+    this.publicKey = null;
     this.provider = new ethers.providers.JsonRpcProvider(this.rpcURL);
     this.contract = null;
     this.signer = null;
@@ -143,6 +144,8 @@ export class Blog {
         .then(address => {
           // this.contract = this.contract.connect(this.signer);
           this.address = address;
+          // TODO: THIS IS WRONG
+          this.publicKey = "3cac9e0f04a5d379e8f49a531d8fc683cd422e259a5e7b062bcff3de582b7c6008918c2fa60a9ff6c86deaea9daa3ed13ed94278d17c279749261016313483ef";
           resolve(this.address);
         })
         .catch(error => reject(new Error(error)));
@@ -160,8 +163,8 @@ export class Blog {
                            blogMetadata }) => {
     return new Promise(async (resolve, reject) => {
 
-      flagsHex = Blog.makeFlagHex({ multiuserP, publicP, deletableP,
-                                    modifiableP, allowRepliesP });
+      flagsHex = Blog.makeBlogFlagHex({ multiuserP, publicP, deletableP,
+                                        modifiableP, allowRepliesP });
 
       try {
         let factory = new ethers.ContractFactory(INPRINT_ABI,
@@ -183,13 +186,18 @@ export class Blog {
   /* --------------------------------------------------- */
   /* 22222222222222                                      */
 
-  publishPost = (content, parent, postType, postFlags, postMetadata) => {
+  publishPost = (content, parent, postType, encryptP, postMetadata) => {
     return new Promise((resolve, reject) => {
+
+      flagsHex = Blog.makePostFlagHex({ encryptP });
+      if (encryptP)
+        content = ecry.encryptWithPublicKey(this.publicKey, content);
+
       const tmp = ethers.utils.arrayify(ethers.utils.keccak256(ethers.utils.toUtf8Bytes(content)));
       this.signer.signMessage(tmp).
         then(sig => {
           return this.contract.publish_post(content, sig, parent, postType,
-            postFlags, postMetadata);
+            flagsHex, postMetadata);
         }).
         catch(error => reject(new Error(error))).
         then(ret => {
@@ -205,7 +213,7 @@ export class Blog {
   /* --------------------------------------------------- */
   /* STATIC METHODS                                      */
 
-  static makeFlagHex = ({ multiuserP, publicP, deletableP, modifiableP, allowRepliesP }) => {
+  static makeBlogFlagHex = ({ multiuserP, publicP, deletableP, modifiableP, allowRepliesP }) => {
     buildingFlags = 0;
     if (multiuserP)
       buildingFlags = buildingFlags | "0x8000";
@@ -217,6 +225,13 @@ export class Blog {
       buildingFlags = buildingFlags | "0x1000";
     if (allowRepliesP)
       buildingFlags = buildingFlags | "0x0800";
+    return buildingFlags;
+  };
+
+  static makePostFlagHex = ({ encryptedP }) => {
+    buildingFlags = 0;
+    if (encryptedP)
+      buildingFlags = buildingFlags | "0x1000";
     return buildingFlags;
   };
   /* --------------------------------------------------- */
