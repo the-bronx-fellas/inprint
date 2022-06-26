@@ -242,8 +242,7 @@ export class Blog {
     let buildingFlags = 0;
     if (encryptedP)
       buildingFlags = buildingFlags | "0x1000";
-    // return buildingFlags;
-    return "0x0000";
+    return buildingFlags;
   };
   /* --------------------------------------------------- */
 
