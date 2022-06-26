@@ -1,29 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Paper, AppBar, Toolbar, Typography, Grid, Button } from '@mui/material'
-import { Blog } from '../hooks/inprint';
-import { ethers } from 'ethers'
-
-const blog = new Blog("0x5FbDB2315678afecb367f032d93F642f64180aa3",
-                      "http://127.0.0.1:8545");
+import { ethers } from 'ethers';
+import { connectBlog } from '../hooks/inPrintHooks'
+import CreateBlogForm from './CreateBlogForm';
 
 const Creation = () => {
 
 
   const [provider, setProvider] = useState()
   const [connected, setConnected] = useState(false)
-  const [account, setAccount] = useState('')
-  const [blogPosts, setBlogPosts] = useState(null)
-
-  const readBlogPosts = async () => {
-    const blogList = await blog.getBlogInfo()
-    setBlogPosts(blogList)
-    console.log(blogList)
-  }
+  const [account, setAccount] = useState('');
 
 
-  useEffect(()=>{
-    readBlogPosts();
-  }, [])
+
+  // useEffect(()=>{
+  //   const blog = connectBlog();
+  //   setContract(blog)
+  //   console.log('contract', contract)
+  // }, [])
 
 
   const connectAccount = async () => {
@@ -58,7 +52,7 @@ const Creation = () => {
   const ValidConnection = () => {
     return (
       <>
-        Form here
+        <CreateBlogForm />
       </>
     )
   }
